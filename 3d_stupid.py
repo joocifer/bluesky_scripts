@@ -19,8 +19,8 @@ data_points = {
     ".  Vance":        (108,  6, 4),
     ".  Netanyahu":    (130,  8, 2),
     ".  Patel":        (95,  6, 7),
-    ".  Bongino":      (90,  8, 8),
-    ".  Mike Johnson": (100,  3, 2),
+    ".  Bongino":      (90,  8, 1),
+    ".  Mike Johnson": (100,  3, 3),
     ".  Ramaswamy":    (105,  1, 8),
     ".  Navaro":       (95,  4, 6),
 }
