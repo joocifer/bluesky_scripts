@@ -4,85 +4,94 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-# Use the provided data points with name as key and tuple of (IQ, Good/Evil, Having a Good Time) as value
+# Use the provided data points with name as key and tuple of 
+# (IQ, Good/Evil, Having a Good Time, Drug Use) as value
 data_points = {
-    ".  Hegseth":      (80,   9, 1),  # (IQ, Good/Evil, Having a Good Time)
-    ".  Adams":        (90,  -5, 2),
-    ".  Trump":        (100, 10, 10),
-    ".  MTG":          (80, 10, 11),
-    ".  Noem":         (80, 7, 5),
-    ".  Rubio":        (105, 5, 1),
-    ".  Musk":         (110,  8, 3),
-    ".  Duffy":        (95,  1, 8),
-    ".  RFK":          (90,  5, 6),
-    ".  Putin":        (125,  10, 12),
-    ".  Vance":        (108,  6, 4),
-    ".  Netanyahu":    (130,  8, 2),
-    ".  Patel":        (95,  6, 7),
-    ".  Bongino":      (90,  8, 1),
-    ".  Mike Johnson": (100,  3, 3),
-    ".  Ramaswamy":    (105,  1, 8),
-    ".  Navaro":       (95,  4, 6),
+    ".  Hegseth":      (80,   9,  1, 10),    # (IQ, Good/Evil, Having a Good Time, Drug Use)
+    ".  Adams":        (90,  -5,  2, 3),
+    ".  Trump":        (100, 10, 10, 2),
+    ".  MTG":          (80, 10, 11, 5),
+    ".  Noem":         (80,  7,  5, 2),       # 0 drug use = pure blue
+    ".  Rubio":        (105, 5,   1, 1),
+    ".  Musk":         (110, 8,   3, 10),
+    ".  Duffy":        (95,  1,   8, 3),
+    ".  RFK":          (90,  5,   6, 6),
+    ".  Putin":        (125, 10, 12, 2),      # 10 drug use = pure red
+    ".  Vance":        (108, 6,   4, 4),
+    ".  Netanyahu":    (130, 8,   2, 3),
+    ".  Patel":        (95,  6,   7, 7),
+    ".  Bongino":      (90,  8,   1, 7),
+    ".  Mike Johnson": (100, 3,   3, 0),
+    ".  Ramaswamy":    (105, 1,   8, 5),
+    ".  Navaro":       (95,  4,   6, 6),
 }
 
 # Create the 3D figure
-#fig = plt.figure(figsize=(12, 10))
 fig = plt.figure(figsize=(20, 14))
 ax = fig.add_subplot(111, projection='3d')
 
-# Generate a color map for better visual differentiation
-cm = plt.cm.get_cmap('tab20')
-colors = [cm(i/len(data_points)) for i in range(len(data_points))]
-
-# Plot each person
-for i, (name, (iq, good_evil, having_fun)) in enumerate(data_points.items()):
-    # Extract the name without the leading dot and spaces
+# Plot each person with marker size and color based on drug use.
+for name, (iq, good_evil, having_fun, drug_use) in data_points.items():
+    # Remove the leading dot and spaces for display if needed.
     clean_name = name.strip(". ")
     
-    # Plot the scatter point
-    ax.scatter(iq, good_evil, having_fun, 
-               c=[colors[i]], marker='o', s=100)
+    # Compute a normalized value for drug use (0.0 to 1.0).
+    drug_norm = drug_use / 10.0
     
-    # Add text label next to each point
-    #ax.text(iq, good_evil, having_fun, f'{clean_name}', fontsize=8)
+    # Compute marker color: pure blue (0,0,1) if drug_use is 0, pure red (1,0,0) if drug_use is 10.
+    marker_color = (drug_norm, 0, 1 - drug_norm)
+    
+    # Compute marker size to correlate with drug use.
+    # Here, a drug use of 0 results in a marker size of 50,
+    # and a drug use of 10 results in a marker size of 150.
+    marker_size = 50 + drug_use * 10
+    
+    # Plot the scatter point.
+    ax.scatter(iq, good_evil, having_fun, color=marker_color, marker='o', s=marker_size)
+    
+    # Add a text label next to the point.
     ax.text(iq, good_evil, having_fun, f'{name}', fontsize=8)
     
-    # Add a red line from the point down to the x-plane (IQ axis)
+    # Draw a red dashed line from the point down to the x-y plane (z=0) for depth reference.
     ax.plot([iq, iq], [good_evil, good_evil], [having_fun, 0], 
             color='red', linestyle='--', linewidth=1.5, alpha=0.7)
 
-# Set labels for axes
+# Set axis labels.
 ax.set_xlabel('IQ')
 ax.set_ylabel('Good/Evil')
 ax.set_zlabel('Having a Good Time')
 
-# Set axis limits with some padding
+# Define axis limits with padding.
 ax.set_xlim(70, 140)
 ax.set_ylim(-10, 15)
 ax.set_zlim(0, 15)
 
-# Add title
-ax.set_title('3D Personality Plot: IQ vs. Good/Evil vs. Having a Good Time', fontsize=14)
+# Add the plot title with a note on the drug use representation.
+ax.set_title('3D Personality Plot: IQ vs. Good/Evil vs. Having a Good Time\n'
+             '(Marker color and size represent Drug Use)', fontsize=14)
 
-# Add a custom legend
+# Create a custom legend using the computed colors.
 legend_elements = []
-for i, name in enumerate([name.strip(". ") for name in data_points.keys()]):
+for name, (iq, good_evil, having_fun, drug_use) in data_points.items():
+    clean_name = name.strip(". ")
+    drug_norm = drug_use / 10.0
+    drug_color = (drug_norm, 0, 1 - drug_norm)
     legend_elements.append(plt.Line2D([0], [0], marker='o', color='w', 
-                          label=name, markerfacecolor=colors[i], markersize=8))
+                          label=clean_name, markerfacecolor=drug_color, markersize=8))
 
-# Position the legend outside the plot
+# Position the legend outside the main plot area.
 ax.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(1.05, 1), 
           fontsize=8, title='People')
 
-# Add grid lines for better depth perception
+# Enable grid lines to aid depth perception.
 ax.grid(True)
 
-# Print the data in the console as well
+# Print the data to the console including drug use.
 print("Person Data:")
-for name, (iq, good_evil, having_fun) in data_points.items():
+for name, (iq, good_evil, having_fun, drug_use) in data_points.items():
     clean_name = name.strip(". ")
-    print(f"{clean_name}: IQ = {iq}, Good/Evil = {good_evil}, Having a Good Time = {having_fun}")
+    print(f"{clean_name}: IQ = {iq}, Good/Evil = {good_evil}, Having a Good Time = {having_fun}, Drug Use = {drug_use}")
 
-# Show the plot (this will make it interactive and rotatable with the mouse)
+# Optimize layout and display the interactive plot.
 plt.tight_layout()
 plt.show()
