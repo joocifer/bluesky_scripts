@@ -42,8 +42,6 @@ for name, (iq, good_evil, having_fun, drug_use) in data_points.items():
     marker_color = (drug_norm, 0, 1 - drug_norm)
     
     # Compute marker size to correlate with drug use.
-    # Here, a drug use of 0 results in a marker size of 50,
-    # and a drug use of 10 results in a marker size of 150.
     marker_size = 50 + drug_use * 10
     
     # Plot the scatter point.
@@ -70,18 +68,23 @@ ax.set_zlim(0, 15)
 ax.set_title('3D Personality Plot: IQ vs. Good/Evil vs. Having a Good Time\n'
              '(Marker color and size represent Drug Use)', fontsize=14)
 
-# Create a custom legend using the computed colors.
-legend_elements = []
-for name, (iq, good_evil, having_fun, drug_use) in data_points.items():
-    clean_name = name.strip(". ")
-    drug_norm = drug_use / 10.0
-    drug_color = (drug_norm, 0, 1 - drug_norm)
-    legend_elements.append(plt.Line2D([0], [0], marker='o', color='w', 
-                          label=clean_name, markerfacecolor=drug_color, markersize=8))
+# Create a mapping of clean names to original dictionary keys
+name_mapping = {name.strip(". "): name for name in data_points.keys()}
+
+# Create a sorted legend list based on drug use, highest at the top
+legend_elements = sorted(
+    [
+        plt.Line2D([0], [0], marker='o', color='w', label=clean_name, 
+                   markerfacecolor=(drug_use / 10.0, 0, 1 - (drug_use / 10.0)), markersize=8)
+        for clean_name, name in name_mapping.items()
+        for _, _, _, drug_use in [data_points[name]]  # Extract drug use from original name
+    ],
+    key=lambda elem: -data_points[name_mapping[elem.get_label()]][3]  # Sort by drug use descending
+)
 
 # Position the legend outside the main plot area.
 ax.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(1.05, 1), 
-          fontsize=8, title='People')
+          fontsize=8, title='People (Sorted by Drug Use)')
 
 # Enable grid lines to aid depth perception.
 ax.grid(True)
